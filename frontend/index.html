@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Weather Assistant</title>
+
+    <link rel="stylesheet" href="/frontend/style.css"></head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🌤️ Smart Weather Assistant</h1>
+
+        <p>Get real-time weather information for any city.</p>
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="city"
+                placeholder="Enter city name"
+            >
+
+            <button onclick="getWeather()">
+                Check Weather
+            </button>
+
+        </div>
+
+        <div id="loading"></div>
+
+        <div id="weather-card" class="weather-card">
+
+            <h2 id="city-name"></h2>
+
+            <div class="weather-info">
+
+                <div>
+                    🌡️
+                    <span id="temperature"></span>
+                    °C
+                </div>
+
+                <div>
+                    💧
+                    <span id="humidity"></span>
+                    %
+                </div>
+
+                <div>
+                    🌧️
+                    <span id="rain"></span>
+                </div>
+
+                <div>
+                    💨
+                    <span id="wind"></span>
+                    km/h
+                </div>
+
+            </div>
+
+            <div class="advice">
+
+                <h3>💡 Smart Advice</h3>
+
+                <p id="advice"></p>
+
+            </div>
+
+        </div>
+
+        <p id="error"></p>
+
+    </div>
+
+    <script src="/frontend/script.js"></script>
+</body>
+
+</html>
