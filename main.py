@@ -150,11 +150,12 @@ def get_weather(city: str):
             detail="Geocoding service timed out."
         )
 
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as e:
+        print("GEOCODING ERROR:", repr(e))
 
         raise HTTPException(
             status_code=503,
-            detail="Geocoding service is currently unavailable."
+            detail=f"Geocoding error: {str(e)}"
         )
 
 
@@ -221,13 +222,13 @@ def get_weather(city: str):
             detail="Weather service timed out."
         )
 
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as e:
+        print("WEATHER ERROR:", repr(e))
 
         raise HTTPException(
             status_code=503,
-            detail="Weather service is currently unavailable."
+            detail=f"Weather error: {str(e)}"
         )
-
 
     # ==================================================
     # STEP 4: EXTRACT CURRENT WEATHER
