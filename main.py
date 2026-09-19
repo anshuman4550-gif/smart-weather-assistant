@@ -201,25 +201,38 @@ def get_weather(city: str):
     }
 
     try:
-
-        # Call Weather API
         weather_response = requests.get(
             weather_url,
             params=weather_params,
-            timeout=10
+            timeout=20,
+            headers={
+                "User-Agent": "SmartWeatherAssistant/1.0"
+            }
         )
 
-        # Check HTTP status
         weather_response.raise_for_status()
 
-        # Convert JSON → Python dictionary
         weather_data = weather_response.json()
 
     except requests.exceptions.Timeout:
-
         raise HTTPException(
             status_code=504,
             detail="Weather service timed out."
+        )
+
+    except requests.exceptions.HTTPError as e:
+
+        if weather_response.status_code == 429:
+            raise HTTPException(
+                status_code=503,
+                detail="Weather API is temporarily rate-limited. Please try again later."
+            )
+
+        print("WEATHER HTTP ERROR:", repr(e))
+
+        raise HTTPException(
+            status_code=503,
+            detail=f"Weather API error: {str(e)}"
         )
 
     except requests.exceptions.RequestException as e:
@@ -382,7 +395,10 @@ def get_forecast(city: str):
         weather_response = requests.get(
             weather_url,
             params=weather_params,
-            timeout=10
+            timeout=20,
+            headers={
+                "User-Agent": "SmartWeatherAssistant/1.0"
+            }
         )
 
         weather_response.raise_for_status()
