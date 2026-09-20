@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
-
+import time
 import os
 from dotenv import load_dotenv
 
@@ -21,6 +21,16 @@ app = FastAPI(
     title="Smart Weather Assistant",
     version="1.0.0"
 )
+
+# ==========================================
+# WEATHER CACHE
+# ==========================================
+
+weather_cache = {}
+
+CACHE_DURATION = 600  # 10 minutes
+
+
 
 app.mount(
     "/frontend",
@@ -113,8 +123,26 @@ def get_forecast_advice(
 # --------------------------------------------------
 
 @app.get("/weather")
+
 def get_weather(city: str):
 
+    city_key = city.strip().lower()
+
+    # Check if city data already exists in cache
+    if city_key in weather_cache:
+
+        cached_data = weather_cache[city_key]
+
+        # Check cache age
+        if time.time() - cached_data["timestamp"] < CACHE_DURATION:
+            print("CACHE HIT:", city_key)
+
+            return cached_data["data"]
+
+        # Cache expired
+        del weather_cache[city_key]
+
+    print("CACHE MISS:", city_key)
     # ==================================================
     # STEP 1: GET CITY COORDINATES
     # ==================================================
@@ -269,33 +297,41 @@ def get_weather(city: str):
 
 
     # ==================================================
-    # STEP 6: RETURN CLEAN API RESPONSE
+    # STEP 6: CREATE CLEAN API RESPONSE
     # ==================================================
 
-    return {
-
+    result = {
         "city": location["name"],
-
         "country": location.get("country"),
-
         "latitude": latitude,
-
         "longitude": longitude,
-
         "temperature": temperature,
-
         "humidity": humidity,
-
         "feels_like": feels_like,
-
         "rain": rain,
-
         "wind_speed": wind_speed,
-
         "weather_code": weather_code,
-
         "advice": advice
     }
+
+    # ==================================================
+    # STEP 7: SAVE RESULT IN CACHE
+    # ==================================================
+
+    weather_cache[city_key] = {
+        "timestamp": time.time(),
+        "data": result
+    }
+
+    print("CACHE SAVED:", city_key)
+
+    # ==================================================
+    # STEP 8: RETURN RESULT
+    # ==================================================
+
+    return result
+
+
 
 
 
@@ -666,26 +702,40 @@ def create_weather_alert(
         )
 
     # ==================================================
-    # STEP 7: RETURN RESULT
+    # STEP 6: CREATE CLEAN API RESPONSE
     # ==================================================
 
-    return {
+    # ==================================================
+    # STEP 6: CREATE CLEAN API RESPONSE
+    # ==================================================
+
+    result = {
 
         "city": location["name"],
 
+        "country": location.get("country"),
+
+        "latitude": latitude,
+
+        "longitude": longitude,
+
         "temperature": temperature,
+
+        "humidity": humidity,
+
+        "feels_like": feels_like,
 
         "rain": rain,
 
-        "status": status,
+        "wind_speed": wind_speed,
 
-        "alerts": alerts,
+        "weather_code": weather_code,
 
-        "action": action,
-
-         "notification_sent": notification_sent
+        "advice": advice
     }
 
+
+   
 
 
 def send_weather_alert(
